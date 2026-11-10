@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.EquipoRouter = void 0;
+const express_1 = require("express");
+const EquipoController_1 = require("../Controller/EquipoController");
+const EquipoRouter = (0, express_1.Router)();
+exports.EquipoRouter = EquipoRouter;
+EquipoRouter.get("/", EquipoController_1.getEquipos);
+EquipoRouter.get("/:id", EquipoController_1.getEquipoPorId);
+EquipoRouter.post("/", EquipoController_1.postEquipo);
+EquipoRouter.put("/:id", EquipoController_1.putEquipo);
+EquipoRouter.delete("/:id", EquipoController_1.deleteEquipo);

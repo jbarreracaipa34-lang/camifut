@@ -1,0 +1,133 @@
+﻿<div class="modal-backdrop" *ngIf="authService.modalAbierto()" (click)="cerrarAlFondo($event)">
+  <div class="modal-card panel-card" (click)="$event.stopPropagation()">
+    <!-- Header Modal -->
+    <div class="modal-header">
+      <div class="modal-brand">
+        <span class="material-symbols-outlined brand-icon">lock</span>
+        <div>
+          <h2 class="font-geist modal-title">Plataforma CamiFut</h2>
+          <p class="font-mono modal-subtitle">ACCESO AL SISTEMA Y GESTIÓN INTEGRAL</p>
+        </div>
+      </div>
+      <button class="btn-close" (click)="authService.cerrarModal()" title="Cerrar">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+
+    <!-- Tabs: Iniciar Sesión / Registrarse -->
+    <div class="tabs-header font-geist">
+      <button type="button" (click)="tab = 'login'" [class.tab-active]="tab === 'login'" class="tab-btn">
+        <span class="material-symbols-outlined">login</span> Iniciar Sesión
+      </button>
+      <button type="button" (click)="tab = 'registro'" [class.tab-active]="tab === 'registro'" class="tab-btn">
+        <span class="material-symbols-outlined">person_add</span> Crear Cuenta
+      </button>
+    </div>
+
+    <!-- Mensajes de Alerta -->
+    <div *ngIf="errorMensaje" class="alert-box alert-error font-mono">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ errorMensaje }}</span>
+    </div>
+
+    <div *ngIf="exitoMensaje" class="alert-box alert-success font-mono">
+      <span class="material-symbols-outlined">check_circle</span>
+      <span>{{ exitoMensaje }}</span>
+    </div>
+
+    <!-- TAB 1: LOGIN -->
+    <div *ngIf="tab === 'login'" class="tab-content">
+      <form [formGroup]="loginForm" (ngSubmit)="submitLogin()">
+        <div class="form-group">
+          <label class="form-label font-mono">CORREO ELECTRÓNICO</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">mail</span>
+            <input 
+              type="email" 
+              formControlName="email" 
+              placeholder="tu.correo@ejemplo.com" 
+              class="form-input font-inter" 
+              autocomplete="email"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label font-mono">CONTRASEÑA</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">key</span>
+            <input 
+              type="password" 
+              formControlName="password" 
+              placeholder="••••••••" 
+              class="form-input font-inter" 
+              autocomplete="current-password"
+            />
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="loginForm.invalid || cargando" class="btn-primary btn-submit font-geist">
+          <span *ngIf="!cargando" class="material-symbols-outlined">arrow_forward</span>
+          <span *ngIf="cargando" class="spinner-small"></span>
+          <span>{{ cargando ? 'VERIFICANDO CREDENCIALES...' : 'INICIAR SESIÓN' }}</span>
+        </button>
+
+        <div class="auth-security-note font-mono">
+          <span class="material-symbols-outlined">verified_user</span>
+          <span>El sistema detectará automáticamente tu perfil y nivel de acceso.</span>
+        </div>
+      </form>
+    </div>
+
+    <!-- TAB 2: REGISTRO -->
+    <div *ngIf="tab === 'registro'" class="tab-content">
+      <form [formGroup]="registroForm" (ngSubmit)="submitRegistro()">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label font-mono">NOMBRES</label>
+            <input type="text" formControlName="nombres" placeholder="Carlos" class="form-input font-inter" />
+          </div>
+          <div class="form-group">
+            <label class="form-label font-mono">APELLIDOS</label>
+            <input type="text" formControlName="apellidos" placeholder="Pérez" class="form-input font-inter" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label font-mono">CORREO ELECTRÓNICO</label>
+          <input type="email" formControlName="email" placeholder="carlos@correo.com" class="form-input font-inter" autocomplete="email" />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label font-mono">CONTRASEÑA</label>
+            <input type="password" formControlName="password" placeholder="Mínimo 6 caracteres" class="form-input font-inter" autocomplete="new-password" />
+          </div>
+          <div class="form-group">
+            <label class="form-label font-mono">TELÉFONO</label>
+            <input type="tel" formControlName="telefono" placeholder="+573001234567" class="form-input font-inter" />
+          </div>
+        </div>
+
+        <!-- Opción Vendedor -->
+        <div class="vendor-toggle-box">
+          <label class="checkbox-label font-inter">
+            <input type="checkbox" formControlName="es_vendedor" (change)="toggleVendedor($event)" />
+            <span>¿Deseas vender camisetas? Crear perfil de Tienda</span>
+          </label>
+
+          <div *ngIf="registroForm.get('es_vendedor')?.value" class="form-group" style="margin-top:12px;">
+            <label class="form-label font-mono" style="color:var(--pitch-green);">NOMBRE DE TU TIENDA / COLECTIVO</label>
+            <input type="text" formControlName="nombre_tienda" placeholder="Ej: Camisetas Retro Bogotá" class="form-input font-inter" />
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="registroForm.invalid || cargando" class="btn-primary btn-submit font-geist">
+          <span *ngIf="!cargando" class="material-symbols-outlined">person_add</span>
+          <span *ngIf="cargando" class="spinner-small"></span>
+          <span>{{ cargando ? 'CREANDO CUENTA...' : 'CREAR CUENTA' }}</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

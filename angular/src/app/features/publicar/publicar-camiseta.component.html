@@ -1,0 +1,262 @@
+<div class="publicar-page">
+
+  <header class="pub-header">
+    <div class="pub-header-inner">
+      <div class="pub-badge font-mono">
+        <span class="material-symbols-outlined" style="font-size:13px">add_circle</span>
+        NUEVA PUBLICACIÓN
+      </div>
+      <h1 class="pub-title font-geist">{{ esEdicion ? 'Editar Publicacion de Camiseta' : 'Publicar Camiseta' }}</h1>
+      <p class="pub-sub font-inter">{{ esEdicion ? 'Modifica equipo, temporada, fotos, precios y stock con el mismo nivel de detalle que al crearla.' : 'Completa los datos de tu camiseta y comienza a vender en CamiFut.' }}</p>
+    </div>
+  </header>
+
+  <div class="pub-form-container">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <!-- SECCIÓN 1: EQUIPO & MARCA -->
+      <div class="form-section">
+        <div class="section-title font-geist">
+          <span class="material-symbols-outlined">sports_soccer</span>
+          Equipo y Marca
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="field-label">EQUIPO / SELECCIÓN *</label>
+            <input formControlName="equipo_nombre" class="field-input" placeholder="Ej: Real Madrid, Colombia..." />
+          </div>
+          <div class="form-group">
+            <label class="field-label">PAÍS / REGIÓN</label>
+            <input formControlName="pais" class="field-input" placeholder="España, Colombia..." />
+          </div>
+          <div class="form-group">
+            <label class="field-label">MARCA</label>
+            <select formControlName="marca" class="field-select">
+              <option>Adidas</option><option>Nike</option><option>Puma</option><option>New Balance</option>
+              <option>Umbro</option><option>Kappa</option><option>Joma</option><option>Otra</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">TEMPORADA (AÑO)</label>
+            <input type="number" formControlName="anio_temporada" class="field-input" />
+          </div>
+          <div class="form-group">
+            <label class="field-label">TIPO DE INDUMENTARIA</label>
+            <select formControlName="tipo_indumentaria" class="field-select">
+              <option value="local">Local (Home)</option>
+              <option value="visitante">Visitante (Away)</option>
+              <option value="tercera">Tercera (Third)</option>
+              <option value="cuarta">Cuarta (Fourth)</option>
+              <option value="arquero">Arquero / Portero (GK)</option>
+              <option value="entrenamiento">Entrenamiento</option>
+              <option value="edicion_especial">Edición Especial</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">GÉNERO</label>
+            <select formControlName="genero" class="field-select">
+              <option value="hombre">Hombre</option>
+              <option value="mujer">Mujer</option>
+              <option value="unisex">Unisex</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: DETALLES DE LA PUBLICACIÓN -->
+      <div class="form-section">
+        <div class="section-title font-geist">
+          <span class="material-symbols-outlined">edit_note</span>
+          Detalles de la Publicación
+        </div>
+        <div class="form-grid">
+          <div class="form-group form-group-full">
+            <label class="field-label">TÍTULO DE LA PUBLICACIÓN *</label>
+            <input formControlName="titulo" class="field-input" placeholder="Ej: Camiseta Real Madrid 2024/25 Local Original" />
+          </div>
+          <div class="form-group form-group-full">
+            <label class="field-label">DESCRIPCIÓN DETALLADA *</label>
+            <textarea formControlName="descripcion" class="field-textarea" rows="4" placeholder="Describe el estado, historia y detalles de la prenda..."></textarea>
+          </div>
+          <div class="form-group">
+            <label class="field-label">EDICIÓN</label>
+            <select formControlName="tipo_edicion" class="field-select">
+              <option value="jugador_version_profesional">Versión Jugador (Pro)</option>
+              <option value="aficionado_estadio">Versión Aficionado / Estadio (Fan / Réplica)</option>
+              <option value="reedicion_retro">Reedición Retro / Especial</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">AUTENTICIDAD</label>
+            <select formControlName="autenticidad" class="field-select">
+              <option value="original_oficial">Original Oficial</option>
+              <option value="replica_autorizada">Réplica Autorizada</option>
+              <option value="reedicion_retro">Reedición Retro</option>
+              <option value="replica_no_oficial">Copia / Réplica No Oficial</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">ESTADO DE LA PRENDA</label>
+            <select formControlName="estado_prenda" class="field-select">
+              <option value="nueva_con_etiqueta">Nueva con Etiqueta (BNWT)</option>
+              <option value="nueva_sin_etiqueta">Nueva sin Etiqueta (BNWOT)</option>
+              <option value="usada_como_nueva">Como Nueva (Mint / Usada 1-2 veces)</option>
+              <option value="usada_buen_estado">Buen Estado</option>
+              <option value="usada_estado_aceptable">Uso Visible (Con marcas)</option>
+              <option value="reliquia_coleccion">Reliquia de Colección</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">CANTIDAD DE USOS</label>
+            <input type="number" formControlName="cantidad_usos" class="field-input" min="0" />
+          </div>
+          <div class="form-group form-group-full">
+            <label class="field-label">DEFECTOS (si aplica)</label>
+            <input formControlName="detalles_defectos" class="field-input" placeholder="Describe cualquier defecto visible..." />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: IMAGEN -->
+      <div class="form-section">
+        <div class="section-title font-geist">
+          <span class="material-symbols-outlined">image</span>
+          Imagen de la Camiseta
+        </div>
+        <div class="image-section">
+          <div class="image-controls">
+            <div class="mode-tabs">
+              <button type="button" class="mode-tab" [class.active]="modoImagen === 'url'" (click)="setModoImagen('url')">URL de Imagen</button>
+              <button type="button" class="mode-tab" [class.active]="modoImagen === 'archivo'" (click)="setModoImagen('archivo')">Subir Archivo</button>
+            </div>
+            @if (modoImagen === 'url') {
+              <div class="form-group">
+                <label class="field-label">URL DE LA IMAGEN</label>
+                <input formControlName="imagen_url" class="field-input" placeholder="https://ejemplo.com/foto.jpg" />
+                <span class="field-hint">Pega la URL directa de la imagen de tu camiseta</span>
+              </div>
+            }
+            @if (modoImagen === 'archivo') {
+              <div class="form-group">
+                <label class="field-label">SELECCIONAR ARCHIVO</label>
+                <input type="file" accept="image/*" (change)="onFileSelected($event)" class="field-input" />
+                @if (nombreArchivoLocal) {
+                  <span class="field-hint">?? {{ nombreArchivoLocal }}</span>
+                }
+              </div>
+            }
+          </div>
+          <div class="preview-frame">
+            @if (previewUrl && !errorCargaImagen) {
+              <img [src]="previewUrl" class="preview-img" alt="Preview" (error)="errorCargaImagen = true" />
+            } @else {
+              <div class="preview-placeholder">
+                <span class="material-symbols-outlined" style="font-size:40px">image</span>
+                <span class="font-mono" style="font-size:10px">VISTA PREVIA</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 4: TALLA, PRECIO & STOCK -->
+      <div class="form-section">
+        <div class="section-title font-geist">
+          <span class="material-symbols-outlined">sell</span>
+          Talla, Precio y Stock
+        </div>
+        <div class="form-grid-3">
+          <div class="form-group">
+            <label class="field-label">TALLA *</label>
+            <select formControlName="talla" class="field-select">
+              <option value="2XS">2XS</option>
+              <option value="XS">XS</option>
+              <option value="S">S</option>
+              <option value="M">M</option>
+              <option value="L">L</option>
+              <option value="XL">XL</option>
+              <option value="2XL">2XL (XXL)</option>
+              <option value="3XL">3XL</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">PRECIO (COP) *</label>
+            <input type="number" formControlName="precio" class="field-input" min="1000" />
+          </div>
+          <div class="form-group">
+            <label class="field-label">STOCK *</label>
+            <input type="number" formControlName="stock" class="field-input" min="1" />
+          </div>
+          <div class="form-group">
+            <label class="field-label">NOMBRE ESTAMPADO</label>
+            <input formControlName="nombre_estampado" class="field-input" placeholder="Ej: MESSI" />
+          </div>
+          <div class="form-group">
+            <label class="field-label">NÚMERO ESTAMPADO</label>
+            <input type="number" formControlName="numero_estampado" class="field-input" placeholder="10" />
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 5: ENTREGA -->
+      <div class="form-section">
+        <div class="section-title font-geist">
+          <span class="material-symbols-outlined">local_shipping</span>
+          Opciones de Entrega
+        </div>
+        <div class="delivery-grid">
+          <label class="delivery-toggle">
+            <input type="checkbox" formControlName="permite_envio_transportadora" />
+            <div>
+              <span class="toggle-label">Envío por Transportadora</span>
+              <span class="toggle-sub font-mono">NACIONAL · CON GUÍA DE SEGUIMIENTO</span>
+            </div>
+          </label>
+          <label class="delivery-toggle">
+            <input type="checkbox" formControlName="permite_entrega_en_persona" />
+            <div>
+              <span class="toggle-label">Entrega Presencial</span>
+              <span class="toggle-sub font-mono">CON VERIFICACIÓN OTP</span>
+            </div>
+          </label>
+        </div>
+        @if (form.get('permite_entrega_en_persona')?.value) {
+          <div class="form-grid" style="margin-top:14px">
+            <div class="form-group">
+              <label class="field-label">CIUDAD DE ENTREGA</label>
+              <input formControlName="ciudad_entrega_persona" class="field-input" placeholder="Medellín" />
+            </div>
+            <div class="form-group">
+              <label class="field-label">ZONA / PUNTO DE ENCUENTRO</label>
+              <input formControlName="zona_entrega_persona" class="field-input" placeholder="Estación Poblado / CC Mayorca" />
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- SUBMIT -->
+      <div class="submit-area">
+        @if (exitoMensaje) {
+          <div class="msg-success font-inter">
+            <span class="material-symbols-outlined">check_circle</span>
+            {{ exitoMensaje }}
+          </div>
+        }
+        @if (errorMensaje) {
+          <div class="msg-error font-inter">
+            <span class="material-symbols-outlined">error</span>
+            {{ errorMensaje }}
+          </div>
+        }
+        <button type="submit" class="btn-primary btn-publish font-geist" [disabled]="form.invalid || guardando">
+          @if (guardando) {
+            <span class="spinner-sm"></span> {{ esEdicion ? 'Guardando cambios...' : 'Publicando...' }}
+          } @else {
+            <span class="material-symbols-outlined">rocket_launch</span> {{ esEdicion ? 'Editar Publicacion de Camiseta' : 'Publicar Camiseta' }}
+          }
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>

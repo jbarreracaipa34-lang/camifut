@@ -1,0 +1,132 @@
+﻿/* === PEDIDOS / MIS COMPRAS === */
+.pedidos-page { background: var(--bg-canvas); min-height: 100vh; }
+
+.ped-header {
+  background: var(--bg-surface-1);
+  border-bottom: 1px solid var(--border-default);
+  padding: 28px 24px;
+}
+.ped-header-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ped-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(6,182,212,0.10); border: 1px solid rgba(6,182,212,0.28);
+  color: var(--circuit-cyan); font-size: 10px; font-weight: 700;
+  letter-spacing: 0.09em; padding: 4px 10px; border-radius: var(--radius-xs); margin-bottom: 8px;
+}
+.ped-title { font-size: 26px; font-weight: 800; letter-spacing: -0.02em; color: #FFF; }
+.buyer-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bg-surface-2); border: 1px solid var(--border-default);
+  padding: 6px 14px; border-radius: var(--radius-full); font-size: 12px; color: var(--text-secondary);
+}
+
+.ped-main { max-width: 920px; margin: 0 auto; padding: 28px 24px 80px; }
+
+/* EMPTY */
+.empty-pane {
+  padding: 60px 24px; text-align: center;
+  background: var(--bg-surface-1); border: 1px solid var(--border-default); border-radius: var(--radius-sm);
+}
+.empty-ico { font-size: 48px; color: var(--text-muted); display: block; margin-bottom: 14px; }
+.empty-pane h3 { font-size: 18px; color: var(--text-primary); margin-bottom: 8px; }
+.empty-pane p { font-size: 13px; color: var(--text-secondary); }
+
+/* SKELETON */
+.skeleton-list { display: flex; flex-direction: column; gap: 16px; }
+.shimmer { background: linear-gradient(90deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.skeleton-row { background: var(--bg-surface-1); border: 1px solid var(--border-default); }
+
+/* PEDIDOS LIST */
+.pedidos-list { display: flex; flex-direction: column; gap: 18px; }
+
+.pedido-card {
+  background: var(--bg-surface-1); border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm); padding: 22px; transition: border-color 0.2s;
+}
+.pedido-card:hover { border-color: var(--border-highlight); }
+
+.pc-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; gap: 12px;
+}
+.pc-header-left { display: flex; flex-direction: column; gap: 4px; }
+.pc-number { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.pc-date { font-size: 12px; color: var(--text-muted); }
+.pc-header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.pc-total { font-size: 22px; font-weight: 800; color: var(--pitch-green); }
+
+.status-chip {
+  font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 2px; letter-spacing: 0.06em;
+}
+.sc-entregado, .sc-completado { background: var(--pitch-green-subtle); color: var(--pitch-green); border: 1px solid rgba(0,245,155,0.28); }
+.sc-en_camino, .sc-enviado { background: rgba(6,182,212,0.10); color: var(--circuit-cyan); border: 1px solid rgba(6,182,212,0.28); }
+.sc-pendiente_despacho, .sc-pagado, .sc-pendiente_pago, .sc-creado {
+  background: rgba(245,158,11,0.12); color: var(--escrow-amber); border: 1px solid rgba(245,158,11,0.3);
+}
+
+/* STEPPER */
+.stepper-track {
+  background: var(--bg-surface-2); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs); padding: 18px 24px; margin-bottom: 18px;
+}
+.stepper-row { display: flex; align-items: center; justify-content: space-between; }
+.step { display: flex; flex-direction: column; align-items: center; gap: 6px; z-index: 1; }
+.step-circle {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--bg-surface-1); border: 2px solid var(--border-default);
+  display: flex; align-items: center; justify-content: center; color: var(--text-muted); transition: all 0.3s;
+}
+.step-circle .material-symbols-outlined { font-size: 16px; }
+.step-txt { font-size: 10px; color: var(--text-muted); transition: color 0.3s; }
+.step-done .step-circle { background: rgba(0,245,155,0.12); border-color: var(--pitch-green); color: var(--pitch-green); }
+.step-done .step-txt { color: var(--text-primary); font-weight: 700; }
+.step-connector { flex: 1; height: 2px; background: var(--border-default); margin: 0 8px; margin-bottom: 20px; transition: background 0.3s; }
+.connector-done { background: var(--pitch-green); }
+
+/* SUBPEDIDOS */
+.subpedidos { display: flex; flex-direction: column; gap: 10px; }
+.sp-card {
+  background: var(--bg-surface-2); border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs); padding: 14px;
+}
+.sp-head {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap;
+  font-size: 11px; color: var(--text-muted);
+}
+.sp-status {
+  background: rgba(99,102,241,0.10); border: 1px solid rgba(99,102,241,0.3);
+  color: #818CF8; padding: 2px 8px; border-radius: 3px; font-size: 9px; font-weight: 700;
+}
+.sp-store {
+  margin-left: auto; display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--text-secondary);
+}
+.sp-item {
+  display: flex; align-items: center; gap: 12px; font-size: 13px;
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+.sp-item:last-child { border-bottom: none; }
+.sp-item-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.sp-item-title { font-weight: 600; color: var(--text-primary); font-size: 13px; }
+.sp-item-meta { font-size: 10px; color: var(--text-muted); }
+.sp-item-price { font-weight: 700; color: var(--pitch-green); font-size: 13px; flex-shrink: 0; }
+
+/* RESPONSIVE */
+@media (max-width: 600px) {
+  .ped-header-inner { flex-direction: column; align-items: flex-start; }
+  .pc-header { flex-direction: column; }
+  .pc-header-right { align-items: flex-start; }
+  .stepper-row { gap: 4px; }
+  .step-txt { font-size: 8px; }
+  .step-circle { width: 26px; height: 26px; }
+  .sp-store { margin-left: 0; }
+}

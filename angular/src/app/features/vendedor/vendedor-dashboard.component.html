@@ -1,0 +1,317 @@
+﻿<div class="vd-page">
+
+  <!-- PAGE HEADER -->
+  <header class="vd-header">
+    <div class="vd-header-inner">
+      <div class="vd-brand">
+        <div class="vd-badge font-mono">
+          <span class="material-symbols-outlined" style="font-size:13px">verified</span>
+          PANEL DE VENDEDOR
+        </div>
+        <h1 class="vd-title font-geist">Panel de Control</h1>
+        <p class="vd-sub font-inter">
+          Tienda: <strong>{{ authService.nombreTienda() || 'Mi Tienda Oficial' }}</strong>
+        </p>
+      </div>
+      <a routerLink="/publicar" class="btn-primary vd-btn-new font-geist">
+        <span class="material-symbols-outlined">add_circle</span>
+        Publicar Camiseta
+      </a>
+    </div>
+  </header>
+
+  <!-- KPI CARDS -->
+  <section class="vd-kpis">
+    <div class="vd-kpis-inner">
+
+      <div class="kpi-card kpi-green">
+        <div class="kpi-ico-box">
+          <span class="material-symbols-outlined">payments</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label font-mono">GANADO NETO</span>
+          <span class="kpi-value font-geist">{{ fmt(totalGanado()) }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-amber">
+        <div class="kpi-ico-box">
+          <span class="material-symbols-outlined">local_shipping</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label font-mono">POR DESPACHAR</span>
+          <span class="kpi-value font-geist">{{ pendienteDespacho() }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-cyan">
+        <div class="kpi-ico-box">
+          <span class="material-symbols-outlined">inventory_2</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label font-mono">PUBLICACIONES</span>
+          <span class="kpi-value font-geist">{{ publicaciones().length }}</span>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-neutral">
+        <div class="kpi-ico-box">
+          <span class="material-symbols-outlined">percent</span>
+        </div>
+        <div class="kpi-info">
+          <span class="kpi-label font-mono">COMISIONES</span>
+          <span class="kpi-value font-geist">{{ fmt(totalComisiones()) }}</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TAB NAV -->
+  <div class="vd-main">
+    <div class="vd-tabs font-mono">
+      <button class="vd-tab" [class.vd-tab-active]="activeTab() === 'ordenes'"
+              (click)="activeTab.set('ordenes')">
+        <span class="material-symbols-outlined" style="font-size:16px">receipt_long</span>
+        Órdenes de Venta
+        @if (pendienteDespacho() > 0) {
+          <span class="tab-badge">{{ pendienteDespacho() }}</span>
+        }
+      </button>
+      <button class="vd-tab" [class.vd-tab-active]="activeTab() === 'publicaciones'"
+              (click)="activeTab.set('publicaciones')">
+        <span class="material-symbols-outlined" style="font-size:16px">storefront</span>
+        Mis Publicaciones
+      </button>
+    </div>
+
+    <!-- ===================== ÓRDENES ===================== -->
+    @if (activeTab() === 'ordenes') {
+      <div class="vd-panel">
+
+        @if (cargandoVentas()) {
+          <div class="skeleton-list">
+            @for (i of [1,2,3]; track i) {
+              <div class="shimmer skeleton-order-row"></div>
+            }
+          </div>
+        }
+
+        @if (!cargandoVentas() && ventas().length === 0) {
+          <div class="empty-pane">
+            <span class="material-symbols-outlined empty-ico">receipt_long</span>
+            <h3 class="font-geist">Sin órdenes aún</h3>
+            <p class="font-inter">Cuando alguien compre una camiseta de tu tienda, aparecerá aquí.</p>
+          </div>
+        }
+
+        @if (!cargandoVentas() && ventas().length > 0) {
+          <div class="orders-list">
+            @for (orden of ventas(); track orden.id) {
+              <div class="order-row" [class.order-urgent]="orden.estado === 'pendiente_despacho'">
+                <div class="order-row-left">
+                  <div class="order-status-dot" [class]="'dot-' + orden.estado"></div>
+                  <div class="order-info">
+                    <span class="order-num font-mono">#{{ orden.numero_pedido || orden.id?.slice(0,8) }}</span>
+                    <span class="order-title font-geist">{{ orden.publicacion_titulo || orden.titulo }}</span>
+                    <span class="order-meta font-inter">
+                      {{ orden.talla }} · {{ fmt(orden.precio_unitario) }} × {{ orden.cantidad }}
+                    </span>
+                  </div>
+                </div>
+                <div class="order-row-right">
+                  <div class="order-total font-geist">{{ fmt(orden.pago_neto_vendedor || 0) }}</div>
+                  <span class="status-chip font-mono status-{{ orden.estado }}">
+                    {{ orden.estado?.replace('_', ' ').toUpperCase() }}
+                  </span>
+                  @if (orden.estado === 'pendiente_despacho') {
+                    <button
+                      type="button"
+                      class="btn-sm-action btn-despachar font-geist"
+                      [disabled]="procesando() === orden.id"
+                      (click)="actualizarEstado(orden.id, 'enviado')"
+                    >
+                      @if (procesando() === orden.id) {
+                        <span class="spinner-xs"></span>
+                      } @else {
+                        <span class="material-symbols-outlined" style="font-size:14px">local_shipping</span>
+                      }
+                      Marcar Enviado
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    }
+
+    <!-- ===================== PUBLICACIONES ===================== -->
+    @if (activeTab() === 'publicaciones') {
+      <div class="vd-panel">
+
+        @if (cargandoPubs()) {
+          <div class="pubs-grid">
+            @for (i of [1,2,3,4]; track i) {
+              <div class="shimmer pub-skeleton"></div>
+            }
+          </div>
+        }
+
+        @if (!cargandoPubs() && publicaciones().length === 0) {
+          <div class="empty-pane">
+            <span class="material-symbols-outlined empty-ico">add_photo_alternate</span>
+            <h3 class="font-geist">No tienes publicaciones</h3>
+            <p class="font-inter">Comienza publicando tu primera camiseta.</p>
+            <a routerLink="/publicar" class="btn-primary font-geist" style="margin-top:16px;display:inline-flex;align-items:center;gap:6px">
+              <span class="material-symbols-outlined">add_circle</span> Publicar ahora
+            </a>
+          </div>
+        }
+
+        @if (!cargandoPubs() && publicaciones().length > 0) {
+          <div class="pubs-grid">
+            @for (pub of publicaciones(); track pub.id) {
+              <div class="pub-card">
+                <div class="pub-img-box">
+                  @if (pub.imagen_portada) {
+                    <img [src]="pub.imagen_portada" [alt]="pub.titulo" class="pub-img" />
+                  } @else {
+                    <span class="material-symbols-outlined pub-img-ico">sports_soccer</span>
+                  }
+                  <span class="pub-state-badge font-mono" [class]="'state-' + pub.estado">
+                    {{ pub.estado?.toUpperCase() }}
+                  </span>
+                </div>
+                <div class="pub-body">
+                  <p class="pub-team font-mono">{{ pub.equipo_nombre }}</p>
+                  <h3 class="pub-title font-geist">{{ pub.titulo }}</h3>
+                  <div class="pub-meta font-mono">
+                    @if (pub.variantes?.length > 0) {
+                      <span>Desde {{ fmt(pub.variantes[0].precio) }}</span>
+                      <span>·</span>
+                      <span>Stock: {{ pub.variantes[0].stock }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="pub-actions">
+                  <a [routerLink]="['/camiseta', pub.id]" class="btn-icon-sm" title="Ver publicación">
+                    <span class="material-symbols-outlined">open_in_new</span>
+                  </a>
+                  <button type="button" class="btn-icon-sm btn-edit" (click)="abrirModalEdicion(pub)" title="Editar">
+                    <span class="material-symbols-outlined">edit</span>
+                  </button>
+                  <button type="button" class="btn-icon-sm btn-delete" (click)="confirmarEliminar(pub)" title="Eliminar">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    }
+
+  </div><!-- end vd-main -->
+
+  <!-- ===== MODAL EDITAR ===== -->
+  @if (modalEdicionAbierto() && publicacionAEditar) {
+    <div class="modal-backdrop" (click)="cerrarModalEdicion()">
+      <div class="modal-box" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <h2 class="font-geist" style="font-size:16px">Editar Publicación</h2>
+          <button type="button" class="modal-close" (click)="cerrarModalEdicion()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="field-label font-mono">TÍTULO</label>
+            <input class="field-input" [(ngModel)]="publicacionAEditar.titulo" />
+          </div>
+          <div class="form-group">
+            <label class="field-label font-mono">DESCRIPCIÓN</label>
+            <textarea class="field-input" rows="3" [(ngModel)]="publicacionAEditar.descripcion"></textarea>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="field-label font-mono">ESTADO</label>
+              <select class="field-input" [(ngModel)]="publicacionAEditar.estado">
+                <option value="activa">Activa</option>
+                <option value="pausada">Pausada</option>
+                <option value="vendida">Vendida</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="field-label font-mono">CIUDAD ENTREGA</label>
+              <input class="field-input" [(ngModel)]="publicacionAEditar.ciudad_entrega_persona" />
+            </div>
+          </div>
+
+          @if (publicacionAEditar.varianteEditable) {
+            <div class="modal-variant-section">
+              <p class="font-mono" style="font-size:10px;color:var(--text-muted);margin-bottom:12px;letter-spacing:.06em">
+                VARIANTE: {{ publicacionAEditar.varianteEditable.talla }}
+              </p>
+              <div class="form-row-2">
+                <div class="form-group">
+                  <label class="field-label font-mono">PRECIO (COP)</label>
+                  <input class="field-input" type="number" [(ngModel)]="publicacionAEditar.varianteEditable.precio" />
+                </div>
+                <div class="form-group">
+                  <label class="field-label font-mono">STOCK</label>
+                  <input class="field-input" type="number" [(ngModel)]="publicacionAEditar.varianteEditable.stock" />
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn-cancel font-mono" (click)="cerrarModalEdicion()">Cancelar</button>
+          <button type="button" class="btn-primary font-geist" (click)="guardarCambiosPublicacion()"
+                  [disabled]="guardandoEdicion()">
+            @if (guardandoEdicion()) {
+              <span class="spinner-xs spinner-dark"></span>
+            } @else {
+              <span class="material-symbols-outlined" style="font-size:16px">save</span>
+            }
+            Guardar Cambios
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ===== MODAL CONFIRMAR ELIMINACIÓN ===== -->
+  @if (publicacionAEliminar) {
+    <div class="modal-backdrop" (click)="publicacionAEliminar = null">
+      <div class="modal-box modal-sm" (click)="$event.stopPropagation()">
+        <div class="modal-head">
+          <span class="material-symbols-outlined" style="color:var(--signal-red)">warning</span>
+          <h2 class="font-geist" style="font-size:15px">Eliminar publicación</h2>
+          <button type="button" class="modal-close" (click)="publicacionAEliminar = null">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="font-inter" style="font-size:13px;color:var(--text-secondary);line-height:1.6">
+            ¿Estás seguro de eliminar <strong>{{ publicacionAEliminar.titulo }}</strong>? Esta acción no se puede deshacer.
+          </p>
+        </div>
+        <div class="modal-foot">
+          <button type="button" class="btn-cancel font-mono" (click)="publicacionAEliminar = null">Cancelar</button>
+          <button type="button" class="btn-delete-confirm font-geist" [disabled]="eliminandoPub()" (click)="ejecutarEliminacion()">
+            @if (eliminandoPub()) { <span class="spinner-xs"></span> } @else {
+              <span class="material-symbols-outlined" style="font-size:15px">delete_forever</span>
+            }
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+</div>

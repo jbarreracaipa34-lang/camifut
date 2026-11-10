@@ -1,0 +1,317 @@
+﻿<div class="admin-page">
+
+  <!-- HEADER -->
+  <header class="adm-header">
+    <div class="adm-header-inner">
+      <div>
+        <div class="adm-badge font-mono">
+          <span class="material-symbols-outlined" style="font-size:13px">admin_panel_settings</span>
+          PANEL ADMINISTRATIVO · RBAC
+        </div>
+        <h1 class="adm-title font-geist">Administración General</h1>
+        <p class="adm-sub font-mono">
+          NIVEL DE ACCESO: <strong style="color:var(--pitch-green)">{{ (authService.rolPrincipal() || 'admin') | uppercase }}</strong> · MÉTRICAS · AUDITORÍA · CONTROL DE ACCESO
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- METRICS -->
+  <section class="adm-metrics">
+    <div class="adm-metrics-inner">
+      <div class="m-card">
+        <div class="m-ico" style="background:rgba(0,245,155,0.10);color:var(--pitch-green)">
+          <span class="material-symbols-outlined">payments</span>
+        </div>
+        <div class="m-info">
+          <span class="m-label font-mono">VOLUMEN TRANSACCIONADO</span>
+          <span class="m-value font-geist">{{ (metricas()?.volumen_total || 0) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+      </div>
+      <div class="m-card">
+        <div class="m-ico" style="background:rgba(6,182,212,0.10);color:var(--circuit-cyan)">
+          <span class="material-symbols-outlined">shopping_bag</span>
+        </div>
+        <div class="m-info">
+          <span class="m-label font-mono">TOTAL PEDIDOS</span>
+          <span class="m-value font-geist">{{ metricas()?.total_pedidos || 0 }}</span>
+        </div>
+      </div>
+      <div class="m-card">
+        <div class="m-ico" style="background:rgba(168,85,247,0.10);color:#A855F7">
+          <span class="material-symbols-outlined">account_balance</span>
+        </div>
+        <div class="m-info">
+          <span class="m-label font-mono">COMISIONES ESCROW (10%)</span>
+          <span class="m-value font-geist" style="color:#A855F7">{{ (metricas()?.comisiones_plataforma || 0) | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+        </div>
+      </div>
+      <div class="m-card">
+        <div class="m-ico" style="background:rgba(244,63,94,0.10);color:#f43f5e">
+          <span class="material-symbols-outlined">gavel</span>
+        </div>
+        <div class="m-info">
+          <span class="m-label font-mono">DISPUTAS ACTIVAS</span>
+          <span class="m-value font-geist" style="color:#f43f5e">{{ metricas()?.disputas_activas || disputas().length }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN CONTENT -->
+  <div class="adm-main">
+
+    <!-- TABS -->
+    <div class="adm-tabs font-mono">
+      <button class="adm-tab" [class.adm-tab-active]="activeTab() === 'pedidos'" (click)="activeTab.set('pedidos')">
+        <span class="material-symbols-outlined" style="font-size:16px">receipt_long</span>
+        Órdenes ({{ pedidos().length }})
+      </button>
+      <button class="adm-tab" [class.adm-tab-active]="activeTab() === 'disputas'" (click)="activeTab.set('disputas')">
+        <span class="material-symbols-outlined" style="font-size:16px">shield_with_heart</span>
+        Disputas
+      </button>
+      <button class="adm-tab" [class.adm-tab-active]="activeTab() === 'usuarios'" (click)="activeTab.set('usuarios')">
+        <span class="material-symbols-outlined" style="font-size:16px">group</span>
+        Usuarios ({{ usuarios().length }})
+      </button>
+      <button class="adm-tab" [class.adm-tab-active]="activeTab() === 'crear'" (click)="activeTab.set('crear')">
+        <span class="material-symbols-outlined" style="font-size:16px">person_add</span>
+        {{ authService.isSuperAdmin() ? 'Nuevo Admin / Staff' : 'Nuevo Personal' }}
+      </button>
+    </div>
+
+    <!-- TAB: PEDIDOS -->
+    @if (activeTab() === 'pedidos') {
+      <div class="adm-panel">
+        <div class="panel-toolbar">
+          <span class="toolbar-label font-mono">TRANSACCIONES REGISTRADAS</span>
+          <button class="btn-refresh font-mono" (click)="cargarPedidos()">
+            <span class="material-symbols-outlined" style="font-size:14px">refresh</span> Actualizar
+          </button>
+        </div>
+        @if (cargandoPedidos()) {
+          <div class="skel-grid">
+            @for (n of [1,2,3,4]; track n) { <div class="shimmer skel-card"></div> }
+          </div>
+        } @else if (pedidos().length === 0) {
+          <div class="empty-box font-inter">No hay transacciones registradas aún.</div>
+        } @else {
+          <div class="orders-grid">
+            @for (p of pedidos(); track p.id) {
+              <div class="order-card">
+                <div class="oc-top">
+                  <div>
+                    <span class="oc-num font-mono">{{ p.numero_pedido || ('#' + p.id.split('-')[0].toUpperCase()) }}</span>
+                    <span class="oc-name font-inter">{{ p.comprador_nombre || 'Comprador' }}</span>
+                    <span class="oc-email font-mono">{{ p.comprador_email || '-' }}</span>
+                  </div>
+                  <div class="oc-right">
+                    <span class="status-chip font-mono" [attr.data-estado]="p.estado_general || p.estado">
+                      {{ (p.estado_general || p.estado || 'CREADO') | uppercase }}
+                    </span>
+                    <span class="oc-total font-geist">{{ p.monto_total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB: DISPUTAS -->
+    @if (activeTab() === 'disputas') {
+      <div class="adm-panel">
+        <div class="panel-toolbar">
+          <span class="toolbar-label font-mono">SUPERVISIÓN Y ARBITRAJE ESCROW</span>
+          <button class="btn-refresh font-mono" (click)="cargarDisputas()">
+            <span class="material-symbols-outlined" style="font-size:14px">refresh</span> Actualizar
+          </button>
+        </div>
+        @if (cargandoDisputas()) {
+          <div class="skel-grid">
+            @for (n of [1,2]; track n) { <div class="shimmer skel-card"></div> }
+          </div>
+        } @else if (disputas().length === 0) {
+          <div class="empty-box" style="text-align:center;padding:40px">
+            <span class="material-symbols-outlined" style="font-size:36px;color:var(--pitch-green);display:block;margin-bottom:8px">verified</span>
+            <strong class="font-geist">Sin disputas activas</strong>
+            <p class="font-inter" style="font-size:12px;color:var(--text-muted);margin-top:4px">Todos los envíos y desembolsos están en estado óptimo.</p>
+          </div>
+        } @else {
+          <div class="disputas-list">
+            @for (d of disputas(); track d.id) {
+              <div class="disputa-card">
+                <div class="dc-header">
+                  <div>
+                    <span class="dc-badge font-mono">{{ d.estado || 'ABIERTA' }}</span>
+                    <h4 class="font-geist" style="margin:6px 0 2px">Disputa #{{ d.id.substring(0,8) }}</h4>
+                    <span class="font-mono" style="font-size:11px;color:var(--text-muted)">Subpedido: {{ d.subpedido_id }}</span>
+                  </div>
+                  <div style="text-align:right">
+                    <span class="font-mono" style="font-size:11px;color:var(--text-secondary)">Monto en Custodia:</span>
+                    <div class="font-geist" style="font-size:18px;font-weight:700;color:var(--pitch-green)">
+                      {{ (d.monto || 0) | currency:'COP':'symbol-narrow':'1.0-0' }}
+                    </div>
+                  </div>
+                </div>
+                <div class="dc-body font-inter">
+                  <p><strong>Motivo:</strong> {{ d.motivo || 'Discrepancia en la entrega' }}</p>
+                  <div class="dc-parties font-mono">
+                    <span>Comprador: {{ d.comprador_nombre || d.comprador_email || 'Usuario' }}</span>
+                    <span>Vendedor: {{ d.tienda_nombre || 'Tienda' }}</span>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB: USUARIOS -->
+    @if (activeTab() === 'usuarios') {
+      <div class="adm-panel">
+        <div class="users-toolbar">
+          <div class="search-box">
+            <span class="material-symbols-outlined">search</span>
+            <input type="text" [(ngModel)]="busquedaUsuarios" (ngModelChange)="onFiltrarUsuarios()"
+                   placeholder="Buscar por nombre o correo (acepta tildes)..." class="search-input font-geist" />
+          </div>
+          <div class="role-filter">
+            <span class="material-symbols-outlined" style="font-size:16px;color:var(--text-muted)">filter_alt</span>
+            <select [(ngModel)]="rolFiltro" (ngModelChange)="onFiltrarUsuarios()" class="filter-select font-mono">
+              <option value="todos">Todos los roles</option>
+              <option value="superadmin">Superadmin</option>
+              <option value="admin">Administrador</option>
+              <option value="moderador">Moderador</option>
+              <option value="soporte">Soporte</option>
+              <option value="vendedor">Vendedor</option>
+              <option value="comprador">Comprador</option>
+            </select>
+          </div>
+        </div>
+        @if (cargandoUsuarios()) {
+          <div class="skel-grid">
+            @for (n of [1,2,3,4]; track n) { <div class="shimmer skel-card" style="height:50px"></div> }
+          </div>
+        } @else if (usuarios().length === 0) {
+          <div class="empty-box font-inter">No se encontraron usuarios con los criterios indicados.</div>
+        } @else {
+          <div class="users-table font-mono">
+            <div class="ut-header">
+              <span>USUARIO</span>
+              <span>ROL</span>
+              <span>EMAIL</span>
+              <span>ESTADO</span>
+              <span>REGISTRADO</span>
+              <span style="text-align:right">ACCIONES</span>
+            </div>
+            @for (u of usuarios(); track u.id) {
+              <div class="ut-row font-inter">
+                <div>
+                  <div style="font-weight:600">{{ u.nombres }} {{ u.apellidos }}</div>
+                  @if (u.nombre_tienda) {
+                    <div class="font-mono" style="font-size:10px;color:var(--pitch-green)">🏪 {{ u.nombre_tienda }}</div>
+                  }
+                </div>
+                <div>
+                  <span class="role-badge"
+                        [class.r-superadmin]="u.rol_principal==='superadmin'"
+                        [class.r-admin]="u.rol_principal==='admin'"
+                        [class.r-moderador]="u.rol_principal==='moderador'"
+                        [class.r-soporte]="u.rol_principal==='soporte'"
+                        [class.r-seller]="u.rol_principal==='vendedor'"
+                        [class.r-buyer]="u.rol_principal==='comprador'">
+                    {{ (u.rol_principal || 'comprador') | uppercase }}
+                  </span>
+                </div>
+                <div class="font-mono" style="font-size:11px;color:var(--text-secondary)">{{ u.email }}</div>
+                <div>
+                  <span class="active-dot" [class.is-active]="u.activo ?? u.esta_activo"></span>
+                  <span style="font-size:11px;margin-left:5px">{{ (u.activo ?? u.esta_activo) ? 'Activo' : 'Inactivo' }}</span>
+                </div>
+                <div class="font-mono" style="font-size:10px;color:var(--text-muted)">{{ u.creado_en | date:'dd/MM/yyyy' }}</div>
+                <div style="text-align:right">
+                  @if (puedeGestionarUsuario(u)) {
+                    <button class="btn-toggle font-mono"
+                            [class.btn-toggle-danger]="u.activo ?? u.esta_activo"
+                            [disabled]="procesandoEstado() === u.id"
+                            (click)="toggleEstado(u)">
+                      @if (procesandoEstado() === u.id) {
+                        ...
+                      } @else {
+                        {{ (u.activo ?? u.esta_activo) ? 'Suspender' : 'Activar' }}
+                      }
+                    </button>
+                  } @else {
+                    <span class="font-mono" style="font-size:10px;color:var(--text-muted)">Protegido</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB: CREAR ADMIN / STAFF -->
+    @if (activeTab() === 'crear') {
+      <div class="adm-panel">
+        <div class="create-admin-card">
+          <h3 class="font-geist" style="margin-bottom:6px">
+            {{ authService.isSuperAdmin() ? 'Crear Nuevo Administrador o Staff' : 'Registrar Personal de Soporte / Moderación' }}
+          </h3>
+          <p class="font-mono" style="font-size:11px;color:var(--text-muted);margin-bottom:20px">
+            {{ authService.isSuperAdmin() ? 'JERARQUÍA COMPLETA · ENCRIPTACIÓN BCRYPT' : 'ROLES SUBORDINADOS PERMITIDOS (MODERADOR / SOPORTE)' }}
+          </p>
+          <form [formGroup]="crearAdminForm" (ngSubmit)="crearAdmin()">
+            <div class="form-grid">
+              <div class="fg">
+                <label class="font-mono">NOMBRES *</label>
+                <input formControlName="nombres" class="fi font-geist" placeholder="Ej. Carlos" />
+              </div>
+              <div class="fg">
+                <label class="font-mono">APELLIDOS *</label>
+                <input formControlName="apellidos" class="fi font-geist" placeholder="Ej. Gómez" />
+              </div>
+              <div class="fg">
+                <label class="font-mono">CORREO ELECTRÓNICO *</label>
+                <input type="email" formControlName="email" class="fi font-geist" placeholder="staff@camifut.com" />
+              </div>
+              <div class="fg">
+                <label class="font-mono">CONTRASEÑA *</label>
+                <input type="password" formControlName="password" class="fi font-geist" placeholder="Mín 6 caracteres" />
+              </div>
+              <div class="fg">
+                <label class="font-mono">TELÉFONO</label>
+                <input formControlName="telefono" class="fi font-geist" placeholder="+57 300 123 4567" />
+              </div>
+              <div class="fg">
+                <label class="font-mono">NIVEL DE PRIVILEGIO / ROL *</label>
+                <select formControlName="rol" class="fi font-mono">
+                  @for (r of rolesDisponibles(); track r.id) {
+                    <option [value]="r.id">{{ r.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            @if (msgCrear()) {
+              <div class="msg-panel" [class.msg-ok]="msgOk()" [class.msg-err]="!msgOk()">{{ msgCrear() }}</div>
+            }
+            <button type="submit" class="btn-primary btn-create font-geist" [disabled]="crearAdminForm.invalid || creando()">
+              @if (creando()) {
+                <span class="spinner-xs"></span> Guardando...
+              } @else {
+                <span class="material-symbols-outlined" style="font-size:16px">person_add</span>
+                Registrar Usuario Staff
+              }
+            </button>
+          </form>
+        </div>
+      </div>
+    }
+
+  </div>
+</div>

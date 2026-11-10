@@ -1,0 +1,120 @@
+<div class="pedidos-page">
+
+  <header class="ped-header">
+    <div class="ped-header-inner">
+      <div>
+        <div class="ped-badge font-mono">
+          <span class="material-symbols-outlined" style="font-size:13px">local_mall</span>
+          MIS COMPRAS
+        </div>
+        <h1 class="ped-title font-geist">Historial de Pedidos</h1>
+      </div>
+      @if (authService.isLoggedIn()) {
+        <div class="buyer-pill font-mono">
+          <span class="material-symbols-outlined" style="font-size:14px">person</span>
+          {{ authService.currentUser()?.nombres }}
+        </div>
+      }
+    </div>
+  </header>
+
+  <div class="ped-main">
+
+    @if (cargando()) {
+      <div class="skeleton-list">
+        @for (i of [1,2,3]; track i) {
+          <div class="shimmer skeleton-row" style="height:110px;border-radius:var(--radius-sm)"></div>
+        }
+      </div>
+    }
+
+    @if (!cargando() && pedidos().length === 0) {
+      <div class="empty-pane">
+        <span class="material-symbols-outlined empty-ico">shopping_bag</span>
+        <h3 class="font-geist">Aún no tienes pedidos</h3>
+        <p class="font-inter">Cuando compres una camiseta, podrás rastrear tu pedido desde aquí.</p>
+        <a routerLink="/catalogo" class="btn-primary font-geist" style="margin-top:18px;display:inline-flex;align-items:center;gap:6px">
+          <span class="material-symbols-outlined">storefront</span> Explorar catálogo
+        </a>
+      </div>
+    }
+
+    @if (!cargando() && pedidos().length > 0) {
+      <div class="pedidos-list">
+        @for (p of pedidos(); track p.id) {
+          <div class="pedido-card">
+            <!-- Card header -->
+            <div class="pc-header">
+              <div class="pc-header-left">
+                <span class="pc-number font-mono">#{{ p.numero_pedido }}</span>
+                <span class="pc-date font-inter">{{ p.creado_en | date:'d MMM yyyy, HH:mm' }}</span>
+              </div>
+              <div class="pc-header-right">
+                <span class="status-chip font-mono" [class]="'sc-' + (p.estado || p.estado_general)">
+                  {{ formatEstado(p.estado || p.estado_general) }}
+                </span>
+                <span class="pc-total font-geist">{{ p.monto_total | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            </div>
+
+            <!-- Order stepper -->
+            <div class="stepper-track">
+              <div class="stepper-row">
+                <div class="step" [class.step-done]="getStepIndex(p.estado || p.estado_general) >= 1">
+                  <div class="step-circle"><span class="material-symbols-outlined">receipt</span></div>
+                  <span class="step-txt font-mono">Creado</span>
+                </div>
+                <div class="step-connector" [class.connector-done]="getStepIndex(p.estado || p.estado_general) >= 2"></div>
+                <div class="step" [class.step-done]="getStepIndex(p.estado || p.estado_general) >= 2">
+                  <div class="step-circle"><span class="material-symbols-outlined">account_balance</span></div>
+                  <span class="step-txt font-mono">Pagado</span>
+                </div>
+                <div class="step-connector" [class.connector-done]="getStepIndex(p.estado || p.estado_general) >= 3"></div>
+                <div class="step" [class.step-done]="getStepIndex(p.estado || p.estado_general) >= 3">
+                  <div class="step-circle"><span class="material-symbols-outlined">local_shipping</span></div>
+                  <span class="step-txt font-mono">En camino</span>
+                </div>
+                <div class="step-connector" [class.connector-done]="getStepIndex(p.estado || p.estado_general) >= 4"></div>
+                <div class="step" [class.step-done]="getStepIndex(p.estado || p.estado_general) >= 4">
+                  <div class="step-circle"><span class="material-symbols-outlined">check_circle</span></div>
+                  <span class="step-txt font-mono">Entregado</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Subpedidos -->
+            @if (p.subpedidos && p.subpedidos.length > 0) {
+              <div class="subpedidos">
+                @for (sp of p.subpedidos; track sp.id) {
+                  <div class="sp-card">
+                    <div class="sp-head font-mono">
+                      <span>{{ sp.numero_subpedido }}</span>
+                      <span class="sp-status">{{ (sp.estado || '').toUpperCase() }}</span>
+                      <span class="sp-store font-inter">
+                        <span class="material-symbols-outlined" style="font-size:13px">storefront</span>
+                        {{ sp.nombre_tienda || 'Vendedor Verificado' }}
+                      </span>
+                    </div>
+                    @if (sp.items && sp.items.length > 0) {
+                      @for (item of sp.items; track item.id) {
+                        <div class="sp-item font-inter">
+                          <span class="material-symbols-outlined" style="font-size:16px;color:var(--pitch-green)">sports_soccer</span>
+                          <div class="sp-item-info">
+                            <span class="sp-item-title">{{ item.titulo }}</span>
+                            <span class="sp-item-meta font-mono">Talla {{ item.talla }} · Cant: {{ item.cantidad }}</span>
+                          </div>
+                          <span class="sp-item-price font-geist">{{ item.subtotal | currency:'COP':'symbol-narrow':'1.0-0' }}</span>
+                        </div>
+                      }
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>

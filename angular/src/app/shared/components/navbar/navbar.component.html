@@ -1,0 +1,210 @@
+﻿<!-- Top Promotional Ticker Bar -->
+<div class="top-announcement-bar font-mono">
+  <div class="ticker-content">
+    <span class="ticker-item"><span class="ticker-bullet">⚡</span> ENVÍOS NACIONALES ASEGURADOS</span>
+    <span class="ticker-sep">•</span>
+    <span class="ticker-item"><span class="ticker-bullet">🛡️</span> PAGO CON CUSTODIA ESCROW 100% BLINDADA</span>
+    <span class="ticker-sep">•</span>
+    <span class="ticker-item"><span class="ticker-bullet">⚽</span> PRENDAS AUTÉNTICAS &amp; ARCHIVO VINTAGE</span>
+  </div>
+</div>
+
+<header class="navbar-header">
+  <div class="navbar-container">
+    <!-- Brand / Logo -->
+    <a routerLink="/" class="navbar-brand">
+      <div class="brand-crest">
+        <span class="material-symbols-outlined brand-crest-icon">sports_soccer</span>
+        <div class="brand-crest-dot"></div>
+      </div>
+      <div class="brand-text">
+        <div class="brand-title font-geist">CAMIFUT<span class="brand-accent">.</span></div>
+        <span class="brand-tagline font-mono">KIT ARCHIVE &amp; MARKETPLACE</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="navbar-nav font-geist">
+      <a routerLink="/catalogo" routerLinkActive="active-nav" [routerLinkActiveOptions]="{exact: true}" class="nav-link">
+        <span class="material-symbols-outlined nav-icon">grid_view</span>
+        <span>Catálogo</span>
+      </a>
+      <a (click)="filtrarPor('retro')" class="nav-link nav-link-special">
+        <span class="material-symbols-outlined nav-icon" style="color:var(--trophy-gold)">history_edu</span>
+        <span>Retro Archive</span>
+        <span class="badge-mini font-mono">VINTAGE</span>
+      </a>
+
+      @if (authService.isAdmin()) {
+        <a routerLink="/admin" routerLinkActive="active-nav" class="nav-link nav-link-admin">
+          <span class="material-symbols-outlined nav-icon">admin_panel_settings</span>
+          <span>Panel Admin</span>
+        </a>
+      }
+      @if (authService.isVendedor() && !authService.isAdmin()) {
+        <a routerLink="/vendedor" routerLinkActive="active-nav" class="nav-link">
+          <span class="material-symbols-outlined nav-icon">storefront</span>
+          <span>Mi Tienda</span>
+        </a>
+        <a routerLink="/publicar" routerLinkActive="active-nav" class="nav-link btn-sell-nav">
+          <span class="material-symbols-outlined nav-icon">add_circle</span>
+          <span>Publicar Kit</span>
+        </a>
+      }
+      @if (!authService.isAdmin() && !authService.isVendedor()) {
+        <a routerLink="/pedidos" routerLinkActive="active-nav" class="nav-link">
+          <span class="material-symbols-outlined nav-icon">local_shipping</span>
+          <span>Mis Pedidos</span>
+        </a>
+      }
+    </nav>
+
+    <!-- Header Actions (Cart, Account, Mobile Toggle) -->
+    <div class="navbar-actions">
+      <!-- Quick search icon -->
+      <a routerLink="/catalogo" class="action-btn" title="Buscar en catálogo">
+        <span class="material-symbols-outlined">search</span>
+      </a>
+
+      <!-- Shopping Cart (Compradores & Invitados) -->
+      @if (!authService.isAdmin()) {
+        <a routerLink="/carrito" class="cart-btn" title="Ver Carrito de Compras">
+          <span class="material-symbols-outlined cart-icon">shopping_bag</span>
+          @if (carritoService.totalItems() > 0) {
+            <span class="cart-badge font-mono">{{ carritoService.totalItems() }}</span>
+          }
+        </a>
+      }
+
+      <!-- User Profile / Login -->
+      @if (!authService.isLoggedIn()) {
+        <button type="button" (click)="abrirLogin('login')" class="btn-login font-geist">
+          <span class="material-symbols-outlined">account_circle</span>
+          <span class="btn-login-text">Acceder</span>
+        </button>
+      } @else {
+        <div class="user-profile-wrapper">
+          <button type="button" (click)="toggleMenuUsuario($event)" class="user-pill-btn"
+            [class.user-pill-admin]="authService.isAdmin()"
+            [class.user-pill-seller]="authService.isVendedor() && !authService.isAdmin()"
+            [class.user-pill-buyer]="!authService.isAdmin() && !authService.isVendedor()">
+            <span class="material-symbols-outlined user-avatar-icon">
+              {{ authService.isAdmin() ? 'shield_person' : (authService.isVendedor() ? 'storefront' : 'person') }}
+            </span>
+            <div class="user-pill-text">
+              <span class="user-role-label font-mono">
+                {{ authService.isAdmin() ? 'ADMIN' : (authService.isVendedor() ? 'TIENDA' : 'COMPRADOR') }}
+              </span>
+              <span class="user-name-label font-geist">
+                {{ authService.isVendedor() && !authService.isAdmin() ? (authService.nombreTienda() || authService.currentUser()?.nombres) : authService.currentUser()?.nombres }}
+              </span>
+            </div>
+            <span class="material-symbols-outlined arrow-icon">arrow_drop_down</span>
+          </button>
+
+          <!-- Dropdown Menu -->
+          @if (menuUsuarioAbierto()) {
+            <div class="user-dropdown panel-card" (click)="$event.stopPropagation()">
+              <div class="dropdown-header">
+                <span class="dropdown-fullname font-geist">{{ authService.nombreCompleto() }}</span>
+                <span class="dropdown-email font-mono">{{ authService.currentUser()?.email }}</span>
+                <div class="dropdown-badge font-mono"
+                  [class.badge-admin]="authService.isAdmin()"
+                  [class.badge-seller]="authService.isVendedor() && !authService.isAdmin()">
+                  ROL: {{ authService.rolPrincipal() | uppercase }}
+                </div>
+              </div>
+
+              <div class="dropdown-links font-geist">
+                @if (authService.isAdmin()) {
+                  <a routerLink="/admin" (click)="cerrarMenuUsuario()" class="dropdown-link">
+                    <span class="material-symbols-outlined">dashboard</span> Panel Administrativo
+                  </a>
+                  <a routerLink="/catalogo" (click)="cerrarMenuUsuario()" class="dropdown-link">
+                    <span class="material-symbols-outlined">grid_view</span> Explorar Catálogo
+                  </a>
+                } @else if (authService.isVendedor()) {
+                  <a routerLink="/vendedor" (click)="cerrarMenuUsuario()" class="dropdown-link">
+                    <span class="material-symbols-outlined">storefront</span> Dashboard de Ventas
+                  </a>
+                  <a routerLink="/publicar" (click)="cerrarMenuUsuario()" class="dropdown-link">
+                    <span class="material-symbols-outlined">add_circle</span> Publicar Nueva Camiseta
+                  </a>
+                } @else {
+                  <a routerLink="/pedidos" (click)="cerrarMenuUsuario()" class="dropdown-link">
+                    <span class="material-symbols-outlined">local_shipping</span> Seguimiento de Pedidos
+                  </a>
+                  <a routerLink="/carrito" (click)="cerrarMenuUsuario()" class="dropdown-link">
+                    <span class="material-symbols-outlined">shopping_bag</span> Mi Carrito
+                  </a>
+                }
+              </div>
+
+              <div class="dropdown-footer">
+                <button type="button" (click)="logout()" class="btn-logout font-geist">
+                  <span class="material-symbols-outlined">logout</span> Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Mobile Hamburger Toggle -->
+      <button type="button" class="mobile-toggle-btn" (click)="toggleMenuMobile()" aria-label="Menú principal">
+        <span class="material-symbols-outlined">{{ menuMobileAbierto() ? 'close' : 'menu' }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer / Offcanvas -->
+  @if (menuMobileAbierto()) {
+    <div class="mobile-drawer panel-card">
+      <div class="mobile-nav-links font-geist">
+        <a routerLink="/catalogo" (click)="cerrarMenuMobile()" class="mobile-link">
+          <span class="material-symbols-outlined">grid_view</span> Catálogo Completo
+        </a>
+        <a (click)="filtrarPor('retro')" class="mobile-link" style="color:var(--trophy-gold)">
+          <span class="material-symbols-outlined">history_edu</span> Retro Archive (Vintage)
+        </a>
+        <a (click)="filtrarPor('local')" class="mobile-link">
+          <span class="material-symbols-outlined">sports_soccer</span> Equipaciones Titulares
+        </a>
+        <a (click)="filtrarPor('visitante')" class="mobile-link">
+          <span class="material-symbols-outlined">flight</span> Camisetas Visitante
+        </a>
+
+        @if (authService.isAdmin()) {
+          <a routerLink="/admin" (click)="cerrarMenuMobile()" class="mobile-link" style="color:#C084FC">
+            <span class="material-symbols-outlined">admin_panel_settings</span> Panel de Control Admin
+          </a>
+        }
+        @if (authService.isVendedor()) {
+          <a routerLink="/vendedor" (click)="cerrarMenuMobile()" class="mobile-link" style="color:var(--pitch-green)">
+            <span class="material-symbols-outlined">storefront</span> Mi Tienda / Ventas
+          </a>
+          <a routerLink="/publicar" (click)="cerrarMenuMobile()" class="mobile-link" style="color:var(--pitch-green)">
+            <span class="material-symbols-outlined">add_circle</span> Publicar Camiseta
+          </a>
+        }
+        @if (!authService.isAdmin() && !authService.isVendedor()) {
+          <a routerLink="/pedidos" (click)="cerrarMenuMobile()" class="mobile-link">
+            <span class="material-symbols-outlined">local_shipping</span> Mis Pedidos &amp; Tracking
+          </a>
+        }
+      </div>
+
+      <div class="mobile-auth-footer font-geist">
+        @if (!authService.isLoggedIn()) {
+          <button type="button" (click)="abrirLogin('login')" class="btn-primary" style="width:100%;justify-content:center">
+            <span class="material-symbols-outlined">login</span> Iniciar Sesión / Registrarse
+          </button>
+        } @else {
+          <button type="button" (click)="logout()" class="btn-logout" style="width:100%;justify-content:center">
+            <span class="material-symbols-outlined">logout</span> Cerrar Sesión
+          </button>
+        }
+      </div>
+    </div>
+  }
+</header>

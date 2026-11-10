@@ -1,0 +1,276 @@
+<div class="detalle-page">
+  <!-- LOADING SKELETON -->
+  @if (cargando) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p class="font-mono" style="color:var(--text-muted);font-size:13px;letter-spacing:1px">CARGANDO DETALLES DE LA PRENDA...</p>
+    </div>
+  }
+
+  <!-- MAIN PRODUCT VIEW -->
+  @if (!cargando && publicacion) {
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb font-mono">
+      <a routerLink="/catalogo" class="bc-link">
+        <span class="material-symbols-outlined" style="font-size:13px">grid_view</span>
+        Catálogo
+      </a>
+      <span class="bc-sep">/</span>
+      <span class="bc-current">{{ publicacion.titulo }}</span>
+    </nav>
+
+    <!-- NOTIFICACIONES TOAST -->
+    @if (mensajeExito) {
+      <div class="toast-success font-inter">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span>{{ mensajeExito }}</span>
+        <a routerLink="/carrito" class="btn-ver-carrito font-mono">IR AL CARRITO &rarr;</a>
+      </div>
+    }
+
+    <div class="product-layout">
+      <!-- COL IZQUIERDA: GALERÍA DE IMÁGENES -->
+      <div class="col-gallery">
+        <!-- Main image container -->
+        <div class="main-image-box">
+          <!-- Badges de confianza sobre la foto -->
+          <div class="image-badges font-mono">
+            @if (publicacion.autenticidad === 'original_oficial') {
+              <span class="badge-pill badge-escrow">
+                <span class="material-symbols-outlined" style="font-size:12px">verified</span>
+                AUTENTICIDAD VERIFICADA
+              </span>
+            }
+            <span class="badge-pill badge-condition">
+              {{ formatoEstadoPrenda(publicacion.estado_prenda) | uppercase }}
+            </span>
+          </div>
+
+          <img
+            [src]="getImagenes()[imagenActual]"
+            [alt]="publicacion.titulo"
+            class="main-img"
+            loading="eager"
+          />
+        </div>
+
+        <!-- Thumbnails si hay más de 1 imagen -->
+        @if (getImagenes().length > 1) {
+          <div class="thumb-strip">
+            @for (img of getImagenes(); track $index) {
+              <button
+                type="button"
+                (click)="imagenActual = $index"
+                class="thumb-btn"
+                [class.thumb-active]="imagenActual === $index"
+              >
+                <img [src]="img" alt="Vista miniatura" class="thumb-img" />
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Ficha técnica rápida -->
+        <div class="tech-strip font-mono">
+          <div class="tech-item">
+            <span class="ti-label">TEMPORADA</span>
+            <span class="ti-val">{{ publicacion.anio_inicio_temporada || publicacion.anio_temporada || '—' }}</span>
+          </div>
+          <div class="tech-sep"></div>
+          <div class="tech-item">
+            <span class="ti-label">TIPO</span>
+            <span class="ti-val">{{ formatoTipoIndumentaria(publicacion.tipo_indumentaria) }}</span>
+          </div>
+          <div class="tech-sep"></div>
+          <div class="tech-item">
+            <span class="ti-label">GÉNERO</span>
+            <span class="ti-val">{{ formatoGenero(publicacion.genero) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COL DERECHA: BUY BOX -->
+      <div class="col-buybox">
+        <!-- Encabezado del producto -->
+        <div class="product-header">
+          <div class="product-team-pill font-mono">
+            <span class="material-symbols-outlined" style="font-size:14px;color:var(--pitch-green)">sports_soccer</span>
+            <span>{{ publicacion.equipo_nombre }}</span>
+          </div>
+          <h1 class="product-title font-geist">{{ publicacion.titulo }}</h1>
+          <div class="store-row font-mono">
+            <span class="store-label">VENDEDOR:</span>
+            <span class="store-name">{{ publicacion.nombre_tienda || 'Tienda Verificada' }}</span>
+            <span class="store-stars">
+              <span class="material-symbols-outlined" style="font-size:14px;color:var(--trophy-gold)">star</span>
+              {{ publicacion.vendedor_reputacion || '5.0' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Precio actual -->
+        <div class="price-hero">
+          <span class="price-sub font-mono">PRECIO:</span>
+          <span class="price-big font-geist">{{ fmt(getPrecioActual()) }}</span>
+        </div>
+
+        <!-- Selector de talla -->
+        <div class="size-section">
+          <div class="size-header font-mono">
+            <span>TALLA DISPONIBLE</span>
+            @if (varianteSeleccionada) {
+              <span class="stock-pill" [class.stock-low]="getStockDisponible() <= 2" [class.stock-out]="getStockDisponible() <= 0">
+                @if (getStockDisponible() <= 0) {
+                  Agotado
+                } @else if (getStockDisponible() === 1) {
+                  ¡Última unidad en stock!
+                } @else {
+                  {{ getStockDisponible() }} unidades en stock
+                }
+              </span>
+            }
+          </div>
+          <div class="size-buttons-row">
+            @for (v of getVariantesActivas(); track v.id) {
+              <button
+                type="button"
+                (click)="seleccionarVariante(v)"
+                [class.size-active]="varianteSeleccionada?.id === v.id"
+                class="size-btn font-mono"
+                [disabled]="(v.stock || 0) <= 0"
+              >
+                <span class="size-letter">{{ v.talla }}</span>
+                <span class="size-price font-geist">{{ fmt(v.precio) }}</span>
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Cantidad & Agregar al carrito -->
+        <div class="checkout-area">
+          <div class="qty-row font-mono">
+            <span class="qty-label">CANTIDAD:</span>
+            <select
+              [(ngModel)]="cantidadSeleccionada"
+              class="qty-select"
+              [disabled]="getStockDisponible() <= 0"
+            >
+              @for (opt of opcionesCantidad; track opt) {
+                <option [value]="opt">{{ opt }}</option>
+              }
+              @if (opcionesCantidad.length === 0) {
+                <option [value]="0">0 (Sin stock)</option>
+              }
+            </select>
+          </div>
+
+          <button
+            type="button"
+            (click)="agregarAlCarrito()"
+            [disabled]="agregando || getStockDisponible() <= 0"
+            class="btn-add-cart btn-primary font-geist"
+          >
+            <span class="material-symbols-outlined">add_shopping_cart</span>
+            <span>
+              {{ agregando ? 'Agregando...' : (getStockDisponible() <= 0 ? 'Agotado' : 'Agregar al Carrito') }}
+            </span>
+          </button>
+
+          @if (mensajeError) {
+            <div class="error-msg font-mono">
+              <span class="material-symbols-outlined" style="font-size:16px">error</span>
+              {{ mensajeError }}
+            </div>
+          }
+        </div>
+
+        <!-- ESCROW Trust Pillars -->
+        <div class="trust-pillars">
+          <div class="trust-pillar">
+            <span class="material-symbols-outlined tp-icon" style="color:var(--pitch-green)">lock</span>
+            <div>
+              <p class="tp-title font-geist">Pago con Custodia Escrow</p>
+              <p class="tp-desc font-inter">Tu dinero queda protegido y se entrega al vendedor solo cuando confirmas la recepción conforme de la prenda.</p>
+            </div>
+          </div>
+          <div class="trust-pillar">
+            <span class="material-symbols-outlined tp-icon" style="color:var(--circuit-cyan)">local_shipping</span>
+            <div>
+              <p class="tp-title font-geist">Envío Nacional Monitoreado</p>
+              <p class="tp-desc font-inter">Despachado por transportadora con guía de seguimiento, o retiro presencial con código OTP de verificación.</p>
+            </div>
+          </div>
+          <div class="trust-pillar">
+            <span class="material-symbols-outlined tp-icon" style="color:var(--trophy-gold)">policy</span>
+            <div>
+              <p class="tp-title font-geist">Autenticidad o Devolución Total</p>
+              <p class="tp-desc font-inter">Si la prenda no corresponde con la descripción o estado declarado, reembolsamos el 100% de tu pago.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESCRIPCIÓN COMPLETA (ABAJO) -->
+    <div class="description-section">
+      <div class="desc-inner">
+        <div class="desc-card panel-card">
+          <h3 class="section-heading font-geist">
+            <span class="material-symbols-outlined" style="color:var(--pitch-green)">menu_book</span>
+            Descripción e Historia de la Prenda
+          </h3>
+          <p class="desc-body font-inter">{{ publicacion.descripcion }}</p>
+
+          <div class="detail-rows font-mono">
+            <div class="detail-row">
+              <span class="dr-key">Edición:</span>
+              <span class="dr-val">{{ formatoEdicion(publicacion.tipo_edicion) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="dr-key">Autenticidad:</span>
+              <span class="dr-val" style="color:var(--pitch-green)">{{ formatoAutenticidad(publicacion.autenticidad) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="dr-key">Estado de la prenda:</span>
+              <span class="dr-val">{{ formatoEstadoPrenda(publicacion.estado_prenda) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="dr-key">Usos previos:</span>
+              <span class="dr-val">{{ formatoUsos(publicacion) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="dr-key">Defectos declarados:</span>
+              <span class="dr-val" [style.color]="publicacion.detalles_defectos ? 'var(--escrow-amber)' : 'var(--pitch-green)'">
+                {{ publicacion.detalles_defectos || 'Sin defectos declarados (Prenda en óptimas condiciones)' }}
+              </span>
+            </div>
+            @if (publicacion.permite_envio_transportadora) {
+              <div class="detail-row">
+                <span class="dr-key">Envío nacional:</span>
+                <span class="dr-val" style="color:var(--pitch-green)">Disponible por transportadora con guía de rastreo</span>
+              </div>
+            }
+            @if (publicacion.permite_entrega_en_persona) {
+              <div class="detail-row">
+                <span class="dr-key">Entrega presencial:</span>
+                <span class="dr-val" style="color:var(--circuit-cyan)">{{ publicacion.ciudad_entrega_persona || 'Ciudad del vendedor' }} – {{ publicacion.zona_entrega_persona || 'Punto a coordinar con OTP' }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (!cargando && !publicacion) {
+    <div class="not-found">
+      <span class="material-symbols-outlined" style="font-size:56px;color:var(--text-muted)">search_off</span>
+      <h2 class="font-geist">Camiseta no encontrada</h2>
+      <p class="font-inter">Es posible que haya sido vendida o retirada del catálogo.</p>
+      <a routerLink="/catalogo" class="btn-primary font-geist" style="margin-top:20px;display:inline-flex">
+        <span class="material-symbols-outlined">grid_view</span>
+        Volver al Catálogo
+      </a>
+    </div>
+  }
+</div>

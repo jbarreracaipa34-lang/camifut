@@ -1,0 +1,233 @@
+### 1. Comprobar estado del servidor
+GET http://localhost:3000/
+###
+
+### =============================================================================
+### AUTENTICACIÓN Y LOGIN MULTI-ROL (COMPRADOR / VENDEDOR / ADMIN)
+### =============================================================================
+
+### 2. Login (Identifica si es Comprador, Vendedor o Admin y devuelve token)
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+    "email": "carlos.perez@example.com",
+    "password": "Password123!"
+}
+###
+
+### 2.1 Obtener Perfil del Usuario Actual (Requiere Token Bearer)
+GET http://localhost:3000/api/auth/perfil
+Authorization: Bearer PEGAR_AQUI_EL_TOKEN_OBTENIDO_EN_EL_LOGIN
+###
+
+### 3. Registro de Nuevo Usuario (Comprador)
+POST http://localhost:3000/api/auth/registro
+Content-Type: application/json
+
+{
+    "email": "carlos.perez@example.com",
+    "password": "Password123!",
+    "nombres": "Carlos",
+    "apellidos": "Pérez",
+    "telefono": "+573001234567"
+}
+###
+
+### 4. Registro Directo como Vendedor (con Tienda)
+POST http://localhost:3000/api/auth/registro
+Content-Type: application/json
+
+{
+    "email": "tienda.retro@example.com",
+    "password": "Password123!",
+    "nombres": "Mateo",
+    "apellidos": "Gómez",
+    "telefono": "+573109876543",
+    "nombre_tienda": "Retro Camisetas Colombia"
+}
+###
+
+### 5. Convertir Usuario existente en Vendedor (Activar Tienda)
+POST http://localhost:3000/api/auth/convertir-en-vendedor
+Content-Type: application/json
+
+{
+    "usuario_id": "REEMPLAZAR_CON_UUID_DE_USUARIO",
+    "nombre_tienda": "Camisetas Clásicas Bogotá"
+}
+###
+
+### 6. Asignar Rol Administrativo (admin, superadmin, moderador)
+POST http://localhost:3000/api/auth/asignar-rol-admin
+Content-Type: application/json
+
+{
+    "usuario_id": "REEMPLAZAR_CON_UUID_DE_USUARIO",
+    "rol": "admin"
+}
+###
+
+### =============================================================================
+### USUARIOS
+### =============================================================================
+
+### 2. Listar Usuarios
+GET http://localhost:3000/api/usuarios
+###
+
+### 3. Crear Usuario Comprador
+POST http://localhost:3000/api/usuarios
+Content-Type: application/json
+
+{
+    "email": "carlos.perez@example.com",
+    "password": "Password123!",
+    "nombres": "Carlos",
+    "apellidos": "Pérez",
+    "telefono": "+573001234567"
+}
+###
+
+### 4. Obtener Usuario por ID (reemplazar UUID)
+GET http://localhost:3000/api/usuarios/00000000-0000-0000-0000-000000000000
+###
+
+### =============================================================================
+### EQUIPOS DE FÚTBOL (CATÁLOGO)
+### =============================================================================
+
+### 5. Listar Equipos
+GET http://localhost:3000/api/equipos
+###
+
+### 6. Crear Equipo de Fútbol
+POST http://localhost:3000/api/equipos
+Content-Type: application/json
+
+{
+    "nombre": "Real Madrid Club de Fútbol",
+    "nombre_corto": "Real Madrid",
+    "slug": "real-madrid",
+    "pais": "España",
+    "tipo_equipo": "club",
+    "escudo_url": "https://example.com/escudos/real-madrid.png"
+}
+###
+
+### 7. Obtener Equipo por ID
+GET http://localhost:3000/api/equipos/1
+###
+
+### =============================================================================
+### MODELOS DE CAMISETA (CATÁLOGO CANÓNICO)
+### =============================================================================
+
+### 8. Listar Modelos de Camiseta
+GET http://localhost:3000/api/modelos-camiseta
+###
+
+### 9. Registrar Modelo de Camiseta Oficial
+POST http://localhost:3000/api/modelos-camiseta
+Content-Type: application/json
+
+{
+    "equipo_id": 1,
+    "marca_id": 1,
+    "anio_inicio_temporada": 2017,
+    "anio_fin_temporada": 2018,
+    "tipo_indumentaria": "local",
+    "etiqueta_edicion": "Final Cardiff",
+    "es_retro": false,
+    "nombre_canonico": "Real Madrid 2017/2018 Local Final Cardiff",
+    "descripcion": "Camiseta icónica de la Decimotercera Champions League ganada en Cardiff."
+}
+###
+
+### =============================================================================
+### PUBLICACIONES (OFERTAS DEL MARKETPLACE)
+### =============================================================================
+
+### 10. Listar Publicaciones Activas
+GET http://localhost:3000/api/publicaciones?estado=activa
+###
+
+### 11. Crear Publicación de un Vendedor (reemplazar UUIDs)
+POST http://localhost:3000/api/publicaciones
+Content-Type: application/json
+
+{
+    "vendedor_id": "00000000-0000-0000-0000-000000000000",
+    "modelo_camiseta_id": "00000000-0000-0000-0000-000000000000",
+    "titulo": "Camiseta Real Madrid 2017/18 Impecable Estado",
+    "descripcion": "Camiseta en perfectas condiciones, con etiquetas y parche oficial de Champions.",
+    "tipo_edicion": "jugador_version_profesional",
+    "autenticidad": "original_oficial",
+    "estado_prenda": "nueva_con_etiqueta",
+    "genero": "hombre",
+    "permite_envio_transportadora": true,
+    "permite_entrega_en_persona": true,
+    "ciudad_entrega_persona": "Medellín",
+    "zona_entrega_persona": "Estación Poblado / CC Mayorca"
+}
+###
+
+### =============================================================================
+### VARIANTES (TALLAS, PRECIOS, STOCK)
+### =============================================================================
+
+### 12. Listar Variantes de una Publicación
+GET http://localhost:3000/api/variantes/publicacion/00000000-0000-0000-0000-000000000000
+###
+
+### 13. Agregar Variante (Talla M con dorsal)
+POST http://localhost:3000/api/variantes
+Content-Type: application/json
+
+{
+    "publicacion_id": "00000000-0000-0000-0000-000000000000",
+    "sku": "RM-2018-M-CR7",
+    "talla": "M",
+    "nombre_estampado": "RONALDO",
+    "numero_estampado": 7,
+    "precio": 320000,
+    "stock": 3
+}
+###
+
+### =============================================================================
+### CARRITO DE COMPRAS
+### =============================================================================
+
+### 14. Ver Carrito del Usuario
+GET http://localhost:3000/api/carrito/00000000-0000-0000-0000-000000000000
+###
+
+### 15. Agregar Camiseta al Carrito
+POST http://localhost:3000/api/carrito/item
+Content-Type: application/json
+
+{
+    "usuario_id": "00000000-0000-0000-0000-000000000000",
+    "variante_id": "00000000-0000-0000-0000-000000000000",
+    "cantidad": 1
+}
+###
+
+### =============================================================================
+### PEDIDOS
+### =============================================================================
+
+### 16. Ver Pedidos del Comprador
+GET http://localhost:3000/api/pedidos/comprador/00000000-0000-0000-0000-000000000000
+###
+
+### 17. Actualizar Estado de un Sub-pedido por Vendedor
+PATCH http://localhost:3000/api/pedidos/subpedido/00000000-0000-0000-0000-000000000000/estado
+Content-Type: application/json
+
+{
+    "estado": "en_camino",
+    "comentario": "Paquete despachado con Servientrega número de guía 987654321"
+}
+###

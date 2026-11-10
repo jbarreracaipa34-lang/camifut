@@ -1,0 +1,370 @@
+<div class="catalogo-page">
+  <!-- EDITORIAL HERO (ESTILO FUTBOLMANIA PREMIUM & ELEGANTE) -->
+  <section class="editorial-hero">
+    <div class="hero-backdrop"></div>
+    <div class="hero-inner">
+      <div class="hero-badge font-mono">
+        <span class="badge-dot"></span>
+        <span>MARKETPLACE OFICIAL &bull; CUSTODIA SEGURA</span>
+      </div>
+      <h1 class="hero-title font-geist">
+        LA PIEL DEL JUEGO.<br>
+        <span class="hero-title-accent">CAMISETAS QUE HACEN HISTORIA.</span>
+      </h1>
+      <p class="hero-subtitle font-inter">
+        Explora equipaciones originales de la temporada actual y joyas vintage de colección, todas verificadas y protegidas por custodia Escrow.
+      </p>
+
+      <div class="hero-ctas font-geist">
+        <button (click)="scrollToGrid()" class="btn-primary">
+          <span>Explorar Catálogo</span>
+          <span class="material-symbols-outlined">arrow_downward</span>
+        </button>
+        <button (click)="setTipo('retro'); scrollToGrid()" class="btn-secondary">
+          <span class="material-symbols-outlined" style="color:var(--trophy-gold)">history_edu</span>
+          <span>Ver Archivo Retro</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- QUICK CATEGORY TILES (INSPIRADAS EN FUTBOLMANIA) -->
+    <div class="category-tiles-container">
+      <div class="category-tiles-grid font-geist">
+        <div class="category-tile" (click)="setTipo('local'); scrollToGrid()">
+          <div class="tile-icon-box">
+            <span class="material-symbols-outlined">shield</span>
+          </div>
+          <div class="tile-content">
+            <span class="tile-title">Clubes Principales</span>
+            <span class="tile-sub font-mono">LALIGA &bull; PREMIER &bull; SERIE A</span>
+          </div>
+        </div>
+
+        <div class="category-tile" (click)="setPais('Colombia'); scrollToGrid()">
+          <div class="tile-icon-box">
+            <span class="material-symbols-outlined">public</span>
+          </div>
+          <div class="tile-content">
+            <span class="tile-title">Selecciones del Mundo</span>
+            <span class="tile-sub font-mono">COLOMBIA &bull; ARGENTINA &bull; BRASIL</span>
+          </div>
+        </div>
+
+        <div class="category-tile tile-retro" (click)="setTipo('retro'); scrollToGrid()">
+          <div class="tile-icon-box">
+            <span class="material-symbols-outlined">history_edu</span>
+          </div>
+          <div class="tile-content">
+            <span class="tile-title">Archivo Retro (80s - 00s)</span>
+            <span class="tile-sub font-mono">EDICIONES HISTÓRICAS</span>
+          </div>
+        </div>
+
+        <div class="category-tile" (click)="setCondicion('nueva_con_etiqueta'); scrollToGrid()">
+          <div class="tile-icon-box">
+            <span class="material-symbols-outlined">verified</span>
+          </div>
+          <div class="tile-content">
+            <span class="tile-title">Nuevas con Etiqueta</span>
+            <span class="tile-sub font-mono">ESTADO IMPECABLE (BNWT)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST VALUE PILLARS (SIN SATURACIÓN, LIMPIO Y PROFESIONAL) -->
+  <section class="trust-bar font-inter">
+    <div class="trust-bar-inner">
+      <div class="trust-col">
+        <span class="material-symbols-outlined trust-ico" style="color:var(--pitch-green)">verified_user</span>
+        <div>
+          <h4 class="trust-h font-geist">Autenticidad Verificada</h4>
+          <p class="trust-p">Inspección de parches, números de serie y etiquetas originales.</p>
+        </div>
+      </div>
+      <div class="trust-col">
+        <span class="material-symbols-outlined trust-ico" style="color:var(--circuit-cyan)">shield</span>
+        <div>
+          <h4 class="trust-h font-geist">Custodia Escrow</h4>
+          <p class="trust-p">Tu dinero no se entrega al vendedor hasta que recibes tu camiseta.</p>
+        </div>
+      </div>
+      <div class="trust-col">
+        <span class="material-symbols-outlined trust-ico" style="color:var(--trophy-gold)">local_shipping</span>
+        <div>
+          <h4 class="trust-h font-geist">Envío Seguro o Punto Físico</h4>
+          <p class="trust-p">Courier nacional asegurado o retiro en punto seguro con código OTP.</p>
+        </div>
+      </div>
+      <div class="trust-col">
+        <span class="material-symbols-outlined trust-ico" style="color:#A855F7">lock_reset</span>
+        <div>
+          <h4 class="trust-h font-geist">Garantía o Devolución</h4>
+          <p class="trust-p">Reembolso íntegro si la prenda no coincide con la descripción.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECCIÓN PRINCIPAL DE CATÁLOGO & FILTROS -->
+  <main class="catalogo-main" id="catalogo-main">
+    <div class="catalogo-container">
+      
+      <!-- TOOLBAR DE FILTROS LIMPIA Y MODERNA -->
+      <div class="filter-toolbar panel-card">
+        <!-- BUSCADOR -->
+        <div class="search-field">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input
+            type="text"
+            [ngModel]="busqueda()"
+            (ngModelChange)="onBusquedaInput($event)"
+            placeholder="Buscar por equipo, camiseta, jugador o temporada..."
+            class="search-input font-geist"
+          />
+          @if (busqueda()) {
+            <button (click)="busqueda.set(''); cargarCatalogo()" class="clear-search-btn" title="Limpiar búsqueda">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          }
+        </div>
+
+        <!-- SELECTOR DE LIGA / PAÍS -->
+        <div class="filter-select-box font-mono">
+          <label class="filter-label">PAÍS / LIGA:</label>
+          <select [ngModel]="paisSeleccionado()" (ngModelChange)="setPais($event)" class="filter-select">
+            <option value="todos">Todos los países</option>
+            @for (p of paises; track p) {
+              @if (p !== 'todos') {
+                <option [value]="p">{{ p }}</option>
+              }
+            }
+          </select>
+        </div>
+
+        <!-- ORDENAMIENTO -->
+        <div class="filter-select-box font-mono">
+          <label class="filter-label">ORDENAR:</label>
+          <select [ngModel]="ordenSeleccionado()" (ngModelChange)="setOrden($event)" class="filter-select">
+            <option value="recientes">Más recientes</option>
+            <option value="precio_asc">Precio: menor a mayor</option>
+            <option value="precio_desc">Precio: mayor a menor</option>
+            <option value="popularidad">Más populares</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TABS RÁPIDAS DE CATEGORÍA & ESTADO -->
+      <div class="category-tabs-row">
+        <div class="tabs-group font-mono">
+          <span class="tabs-title">EDICIÓN:</span>
+          <button (click)="setTipo('todos')" [class.tab-active]="tipoSeleccionado() === 'todos'" class="tab-chip">Todos</button>
+          <button (click)="setTipo('local')" [class.tab-active]="tipoSeleccionado() === 'local'" class="tab-chip">Titular (Local)</button>
+          <button (click)="setTipo('visitante')" [class.tab-active]="tipoSeleccionado() === 'visitante'" class="tab-chip">Visitante</button>
+          <button (click)="setTipo('retro')" [class.tab-active]="tipoSeleccionado() === 'retro'" class="tab-chip tab-retro">
+            ★ Retro / Vintage
+          </button>
+        </div>
+
+        <div class="tabs-group font-mono">
+          <span class="tabs-title">ESTADO:</span>
+          <button (click)="setCondicion('todos')" [class.tab-active]="condicionSeleccionada() === 'todos'" class="tab-chip">Todos</button>
+          <button (click)="setCondicion('nueva_con_etiqueta')" [class.tab-active]="condicionSeleccionada() === 'nueva_con_etiqueta'" class="tab-chip">BNWT (Con Etiqueta)</button>
+          <button (click)="setCondicion('usada_como_nueva')" [class.tab-active]="condicionSeleccionada() === 'usada_como_nueva'" class="tab-chip">Como Nueva (Mint)</button>
+        </div>
+
+        <div class="counter-box font-mono">
+          <span class="counter-num">{{ publicaciones().length }}</span> KITS DISPONIBLES
+        </div>
+      </div>
+
+      <!-- ESTADO DE CARGA CON SHIMMER SKELETONS -->
+      @if (cargando()) {
+        <div class="kits-grid">
+          @for (i of [1,2,3,4,5,6,7,8]; track i) {
+            <div class="kit-card skeleton-card">
+              <div class="skeleton-img shimmer"></div>
+              <div class="skeleton-info">
+                <div class="skeleton-line shimmer" style="width:40%;height:12px"></div>
+                <div class="skeleton-line shimmer" style="width:85%;height:18px;margin:8px 0"></div>
+                <div class="skeleton-line shimmer" style="width:30%;height:14px"></div>
+                <div class="skeleton-line shimmer" style="width:100%;height:36px;margin-top:14px"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- PRODUCT GRID (ESTILO FUTBOLMANIA: LIMPIO, PROPORCIÓN ELEGANTE) -->
+      @if (!cargando()) {
+        @if (publicaciones().length === 0) {
+          <div class="empty-state panel-card">
+            <span class="material-symbols-outlined empty-icon">sports_soccer</span>
+            <h3 class="font-geist">No encontramos camisetas con estos filtros</h3>
+            <p class="font-inter">
+              Prueba cambiando el equipo, la temporada o restablece los filtros para ver todo el catálogo disponible.
+            </p>
+            <button (click)="limpiarFiltros()" class="btn-primary font-geist">
+              <span class="material-symbols-outlined">restart_alt</span>
+              <span>Restablecer Filtros</span>
+            </button>
+          </div>
+        } @else {
+          <div class="kits-grid">
+            @for (pub of publicaciones(); track pub.id) {
+              <article class="kit-card">
+                <!-- FOTOGRAFÍA DE LA CAMISETA CON RATIO Y HOVER ELEGANTE -->
+                <div class="kit-image-wrapper">
+                  @if (!imagenesFallidas()[pub.id] && (pub.imagen_portada || pub.imagen_url)) {
+                    <img
+                      [src]="pub.imagen_portada || pub.imagen_url"
+                      [alt]="pub.titulo"
+                      class="kit-photo"
+                      (error)="registrarFalloImagen(pub.id)"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <div class="kit-fallback-view font-mono">
+                      <span class="material-symbols-outlined fallback-icon">sports_soccer</span>
+                      <span class="fallback-text">FOTO OFICIAL EN VERIFICACIÓN</span>
+                    </div>
+                  }
+                  @if (pub.imagen_url && !imagenesFallidas()[pub.id]) {
+                    <div class="foto-adicional font-mono">
+                      <span class="material-symbols-outlined">image</span>
+                      <span>URL: {{ pub.imagen_url.length > 30 ? pub.imagen_url.substring(0, 27) + '...' : pub.imagen_url }}</span>
+                    </div>
+                  }
+
+                  <!-- INSIGNIAS DISCRETAS -->
+                  <div class="kit-badges-overlay">
+                    <span class="badge-verified font-mono">
+                      <span class="material-symbols-outlined" style="font-size:12px">verified</span>
+                      ORIGINAL
+                    </span>
+                    @if (pub.estado_prenda === 'nueva_con_etiqueta') {
+                      <span class="badge-condition font-mono">BNWT</span>
+                    } @else {
+                      <span class="badge-condition font-mono">MINT</span>
+                    }
+                  </div>
+
+                  <!-- REPUTACIÓN TIENDA -->
+                  <div class="seller-badge font-mono">
+                    <span class="material-symbols-outlined" style="font-size:12px;color:var(--trophy-gold)">star</span>
+                    <span>{{ pub.vendedor_reputacion || 4.9 }}</span>
+                    <span class="seller-name">&bull; {{ pub.nombre_tienda || 'Tienda Oficial' }}</span>
+                  </div>
+                </div>
+
+                <!-- DETALLES DEL PRODUCTO -->
+                <div class="kit-content">
+                  <div class="kit-meta font-mono">
+                    <span class="team-tag">{{ pub.equipo_nombre }}</span>
+                    <span class="year-tag">{{ pub.anio_inicio_temporada || pub.anio_temporada || '2024' }}</span>
+                    @if (pub.marca) {
+                      <span class="marca-tag">{{ pub.marca }}</span>
+                    }
+                  </div>
+
+                  <h3 class="kit-title font-geist" [title]="pub.titulo">
+                    <a [routerLink]="['/camiseta', pub.id]">{{ pub.titulo }}</a>
+                  </h3>
+
+                  <!-- DESCRIPCIÓN RESUMIDA -->
+                  @if (pub.descripcion) {
+                    <p class="descripcion-resumida font-inter">
+                      {{ pub.descripcion.length > 50 ? pub.descripcion.substring(0, 47) + '...' : pub.descripcion }}
+                    </p>
+                  }
+
+                  <!-- TALLAS DISPONIBLES -->
+                  <div class="sizes-box font-mono">
+                    <span class="sizes-title">TALLAS:</span>
+                    <div class="sizes-list">
+                      @if (pub.variantes && pub.variantes.length > 0) {
+                        @for (v of pub.variantes; track v.id) {
+                          <span class="size-chip">{{ v.talla }}</span>
+                        }
+                      } @else {
+                        <span class="size-chip">M</span>
+                        <span class="size-chip">L</span>
+                      }
+                    </div>
+                  </div>
+
+                  <!-- DATOS ADICIONALES (BADGES Y DETALLES) -->
+                  <div class="datos-adicionales font-mono">
+                    @if (pub.tipo_edicion) {
+                      <span class="dato-chip dato-chip-edicion">
+                        {{ formatoEdicion(pub.tipo_edicion) }}
+                      </span>
+                    }
+                    @if (pub.autenticidad) {
+                      <span class="dato-chip dato-chip-autenticidad">
+                        <span class="material-symbols-outlined chip-icon">verified</span>
+                        {{ formatoAutenticidad(pub.autenticidad) }}
+                      </span>
+                    }
+                    @if (pub.detalles_defectos) {
+                      <span class="dato-chip dato-chip-condicion">
+                        {{ pub.detalles_defectos }}
+                      </span>
+                    }
+                    @if (pub.cantidad_usos !== undefined && pub.cantidad_usos > 0) {
+                      <span class="dato-chip dato-chip-muted">
+                        {{ pub.cantidad_usos }} {{ pub.cantidad_usos === 1 ? 'uso' : 'usos' }}
+                      </span>
+                    }
+                    @if (pub.genero) {
+                      <span class="dato-chip dato-chip-muted">
+                        {{ formatoTexto(pub.genero) }}
+                      </span>
+                    }
+                    @if (pub.es_retro) {
+                      <span class="dato-chip dato-chip-retro">
+                        ★ Retro
+                      </span>
+                    }
+                  </div>
+
+                  <!-- BADGES DE ENTREGA / ENVÍO -->
+                  @if (pub.permite_envio_transportadora || pub.permite_entrega_en_persona) {
+                    <div class="envio-badges font-mono">
+                      @if (pub.permite_envio_transportadora) {
+                        <span class="envio-chip">
+                          <span class="material-symbols-outlined chip-icon text-pitch-green">local_shipping</span>
+                          Envío nacional
+                        </span>
+                      }
+                      @if (pub.permite_entrega_en_persona) {
+                        <span class="envio-chip">
+                          <span class="material-symbols-outlined chip-icon text-trophy-gold">person</span>
+                          Entrega en persona
+                        </span>
+                      }
+                    </div>
+                  }
+
+                  <!-- FOOTER CON PRECIO & ACCIÓN RÁPIDA -->
+                  <div class="kit-footer">
+                    <div class="price-box">
+                      <span class="price-from font-mono">PRECIO</span>
+                      <span class="price-number font-geist">{{ fmt(getPrecioMin(pub)) }}</span>
+                    </div>
+
+                    <a [routerLink]="['/camiseta', pub.id]" class="btn-card-action font-geist">
+                      <span>Ver Prenda</span>
+                      <span class="material-symbols-outlined" style="font-size:15px">arrow_forward</span>
+                    </a>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        }
+      }
+    </div>
+  </main>
+</div>
